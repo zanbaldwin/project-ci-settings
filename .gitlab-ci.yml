@@ -13,9 +13,9 @@ build_assets:
         # If we have any Javascript dependencies (such as LESS or React), install them now.
         - if [[ -e ./package.json ]]; then npm install; fi
         # Install assets.
-        - app/console assets:install         -e test
+        - app/console assets:install -e test
         # Compile assets.
-        - app/console assetic:dump           -e test
+        - app/console assetic:dump -e test
 
 # Test Job: Run the unit tests.
 unit_tests:
