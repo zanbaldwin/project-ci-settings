@@ -1,0 +1,19 @@
+{
+    "require-dev": {
+        "squizlabs/php_codesniffer": "@stable",
+        "phpmd/phpmd": "@stable",
+        "phpunit/phpunit": "@stable",
+        "phpunit/php-invoker": "@stable",
+        "humbug/humbug": "*",
+        "mockery/mockery": "@stable",
+        "behat/behat": "@stable",
+        "behat/symfony2-extension": "@stable",
+        "behat/mink-extension": "@stable",
+        "behat/mink-browserkit-driver": "@stable"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "bin-dir": "bin"
+    }
+}

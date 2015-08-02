@@ -1,0 +1,11 @@
+default:
+    suites:
+        app:
+            paths: [ "%paths.base%/src/AppBundle/Features" ]
+            contexts: [ AppBundle\Features\Context\AppBundleContext ]
+    extensions:
+        Behat\Symfony2Extension: ~
+        Behat\MinkExtension:
+            sessions:
+                default:
+                    symfony2: ~

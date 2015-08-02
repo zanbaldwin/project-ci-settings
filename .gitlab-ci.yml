@@ -1,0 +1,35 @@
+# Commands to bootstrap the environment before each job is run.
+before_script:
+    - composer self-update
+    - composer install -n
+    - app/console doctrine:database:create -e test
+    - app/console doctrine:schema:create -e test
+
+# Test Job: Run the unit tests.
+unit_tests:
+    script:
+        - ./bin/phpunit
+        - ./bin/humbug
+
+# Test Job: Run the functional tests.
+functional_tests:
+    script:
+        - if [[ -e ./package.json ]]; then npm install; fi
+        - app/console assets:install         -e test
+        - app/console assetic:dump           -e test
+        - app/console doctrine:fixtures:load -e test -n
+        - ./bin/behat
+
+# Test Job: Check the coding standards of the source code.
+coding_standards:
+    script:
+        - ./bin/phpcs ./src --standard=ruleset.xml
+        - ./bin/phpmd ./src text ./phpmd.xml
+
+# Deployment Job: If all tests pass and this is branch master, then deploy the application.
+ansible_playbook:
+    type: deploy
+    only: [ master ]
+    script:
+        - apt-get update && apt-get install ansible
+        - ansible-playbook ./provisions/symfony-playbook.yml

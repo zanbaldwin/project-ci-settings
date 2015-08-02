@@ -1,0 +1,4 @@
+[submodule "provisions"]
+	path = provisions
+	url = git://github.com/zanderbaldwin/ansible-provisions.git
+	branch = master
