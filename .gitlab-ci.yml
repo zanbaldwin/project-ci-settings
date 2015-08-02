@@ -1,35 +1,53 @@
 # Commands to bootstrap the environment before each job is run.
 before_script:
+    # Update package manager and install PHP dependencies.
     - composer self-update
     - composer install -n
+    # Create the database and its schema.
     - app/console doctrine:database:create -e test
     - app/console doctrine:schema:create -e test
+
+build_assets:
+    type: build
+    script:
+        # If we have any Javascript dependencies (such as LESS or React), install them now.
+        - if [[ -e ./package.json ]]; then npm install; fi
+        # Install assets.
+        - app/console assets:install         -e test
+        # Compile assets.
+        - app/console assetic:dump           -e test
 
 # Test Job: Run the unit tests.
 unit_tests:
     script:
+        # PHPUnit.
         - ./bin/phpunit
+        # Mutation Testing.
         - ./bin/humbug
 
-# Test Job: Run the functional tests.
+# Test Job: Functional.
 functional_tests:
     script:
-        - if [[ -e ./package.json ]]; then npm install; fi
-        - app/console assets:install         -e test
-        - app/console assetic:dump           -e test
+        # Load database fixtures for initial site data.
         - app/console doctrine:fixtures:load -e test -n
+        # Run functional tests.
         - ./bin/behat
 
-# Test Job: Check the coding standards of the source code.
+# Test Job: Coding Standards.
 coding_standards:
     script:
+        # PHP Code Sniffer.
         - ./bin/phpcs ./src --standard=ruleset.xml
+        # PHP Mess Detector.
         - ./bin/phpmd ./src text ./phpmd.xml
 
-# Deployment Job: If all tests pass and this is branch master, then deploy the application.
+# Deployment Job.
 ansible_playbook:
     type: deploy
+    # Only deploy if the "master" branch was pushed.
     only: [ master ]
     script:
+        # Install Ansible deployment tool.
         - apt-get update && apt-get install ansible
+        # Run the playbook for deploying a Symfony project (WIP).
         - ansible-playbook ./provisions/symfony-playbook.yml
