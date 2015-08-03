@@ -41,6 +41,11 @@ coding_standards:
         # PHP Mess Detector.
         - ./bin/phpmd ./src text ./phpmd.xml
 
+# Check PHP dependencies for known security vulnerabilities.
+check_security:
+    script:
+        - ./bin/security-checker security:check ./composer.lock
+
 # Deployment Job.
 ansible_playbook:
     type: deploy
