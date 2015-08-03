@@ -9,7 +9,8 @@
         "behat/behat": "@stable",
         "behat/symfony2-extension": "@stable",
         "behat/mink-extension": "@stable",
-        "behat/mink-browserkit-driver": "@stable"
+        "behat/mink-browserkit-driver": "@stable",
+        "sensiolabs/security-checker": "@stable"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
