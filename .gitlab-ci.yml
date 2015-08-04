@@ -1,58 +1,31 @@
-# Commands to bootstrap the environment before each job is run.
+# Commands to bootstrap the environment before each job is run. This is here for
+# reference but we don't need to bother with it anymore now that we use a
+# Makefile.
 before_script:
-    # Update package manager and install PHP dependencies.
-    - composer self-update
-    - composer install -n
-    # Create the database and its schema.
-    - app/console doctrine:database:create -e test
-    - app/console doctrine:schema:create -e test
-
-build_assets:
-    type: build
-    script:
-        # If we have any Javascript dependencies (such as LESS or React), install them now.
-        - if [[ -e ./package.json ]]; then npm install; fi
-        # Install assets.
-        - app/console assets:install -e test
-        # Compile assets.
-        - app/console assetic:dump -e test
 
 # Test Job: Run the unit tests.
 unit_tests:
     script:
-        # PHPUnit.
-        - ./bin/phpunit
-        # Mutation Testing.
-        - ./bin/humbug
+        - make unit_tests
 
-# Test Job: Functional.
+# Test Job: Run the functional tests.
 functional_tests:
     script:
-        # Load database fixtures for initial site data.
-        - app/console doctrine:fixtures:load -e test -n
-        # Run functional tests.
-        - ./bin/behat
+        - make functional_tests
 
-# Test Job: Coding Standards.
+# Test Job: Check the coding standards of the source code.
 coding_standards:
     script:
-        # PHP Code Sniffer.
-        - ./bin/phpcs ./src --standard=ruleset.xml
-        # PHP Mess Detector.
-        - ./bin/phpmd ./src text ./phpmd.xml
+        - make functional_tests
 
 # Check PHP dependencies for known security vulnerabilities.
 check_security:
     script:
-        - ./bin/security-checker security:check ./composer.lock
+        - make security_check
 
-# Deployment Job.
+# Deployment Job: If all tests pass and this is branch master, then deploy the application.
 ansible_playbook:
     type: deploy
-    # Only deploy if the "master" branch was pushed.
     only: [ master ]
     script:
-        # Install Ansible deployment tool.
-        - apt-get update && apt-get install ansible
-        # Run the playbook for deploying a Symfony project (WIP).
-        - ansible-playbook ./provisions/symfony-playbook.yml
+        - make deploy
