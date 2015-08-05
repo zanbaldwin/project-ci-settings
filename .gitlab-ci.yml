@@ -16,7 +16,7 @@ functional_tests:
 # Test Job: Check the coding standards of the source code.
 coding_standards:
     script:
-        - make functional_tests
+        - make coding_standards
 
 # Check PHP dependencies for known security vulnerabilities.
 check_security:
@@ -28,4 +28,5 @@ ansible_playbook:
     type: deploy
     only: [ master ]
     script:
-        - make deploy
+        - apt-get update && apt-get install ansible
+        - ansible-playbook ./provisions/symfony-playbook.yml

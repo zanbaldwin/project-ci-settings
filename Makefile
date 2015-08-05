@@ -1,3 +1,8 @@
+# A Note About Environment.
+# This Makefile is for testing environments ONLY. It's intended for quickly provisioning up the project so that it can
+# be tested easily of either a development machine or CI build. It is not in any way intended for deployment or
+# production. YOU HAVE BEEN WARNED.
+
 usage:
 	@echo "Usage: make <command>"
 	@echo ""
@@ -14,20 +19,20 @@ usage:
 	@echo "  | coding_standards Check source code adheres to coding standards."
 	@echo "  | security_check   Check dependencies have no known security vulnerabilities."
 	@echo ""
-	@echo "  deploy             Deploy project according to Ansible hosts and vars."
-	@echo ""
 
 ### SETUP ###
 
 composer: composer.json
-	composer install
+	# Although specifying the "no interaction" flag means that we might get some cases where the incorrect parameters
+	# are used, it's better than not having any parameter.yml file at all in our CI build.
+	composer install -n
 
 database: app/console
-	app/console doctrine:database:create --if-not-exists
-	app/console doctrine:schema:update --force
+	app/console doctrine:database:create --if-not-exists -e test
+	app/console doctrine:schema:update --force -e test
 
 fixtures: database
-	app/console doctrine:fixtures:load -n
+	app/console doctrine:fixtures:load -n -e test
 
 node_modules:
 ifneq ($(wildcard package.json),)
@@ -35,13 +40,10 @@ ifneq ($(wildcard package.json),)
 endif
 
 assets: app/console
-	app/console assets:install
-	app/console assetic:dump
+	app/console assets:install -e test
+	app/console assetic:dump -e test
 
 setup: composer database
-	# Clear the cache for production and testing, regardless of what environment
-	# is being used. If we are on "dev" then the cache gets cleared automatically.
-	app/console cache:clear -e prod
 	app/console cache:clear -e test
 
 ### TESTS ###
@@ -61,9 +63,3 @@ security_check: composer composer.lock
 	./bin/security-checker security:check ./composer.lock
 
 test: setup unit_tests functional_tests coding_standards security_check
-
-### DEPLOYMENT ###
-
-deploy: provisions/symfony-playbook.yml
-	sudo apt-get update && sudo apt-get install -y ansible
-	ansible-playbook ./provisions/symfony-playbook.yml
